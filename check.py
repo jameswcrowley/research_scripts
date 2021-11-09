@@ -23,6 +23,7 @@ if np.mean(data[0]) > 1.2:
 chi2 = np.sum((data - cube)**2, axis=(1))/(10**-4 * 60)
     
 chi2 = chi2/(weights[:, None, None]**2)
+chi2_mean = np.mean(chi2[:, :])
 
 print("chi-sq of inversion: " + str(sys.argv[1]) + " with observation: " + str(sys.argv[2]) + " is:"))
-print(chi2)
+print(chi2_mean)
