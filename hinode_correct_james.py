@@ -10,7 +10,7 @@ import sys
 # otherwise, this part is the same.
 cube_name = sys.argv[1]
 output_cube_name = sys.argv[2]
-sir = sys.argv[3]
+#sir = sys.argv[3] # idea: if TRUE, reshape for SIR... 
 
 stokes = fits.open(cube_name)[0]
 SPBSHIFT = stokes.header[103]
@@ -20,34 +20,32 @@ stokes = stokes.astype('float')
 
 stokesI = np.copy(stokes[:,:,0,:])
 if (SPBSHIFT > 0):
-	stokesI *= 2
-negative = np.where(stokesI < 0.0)
-stokesI[negative] += 65536.
-stokes[:,:,0,:] = stokesI
+    stokes[:,:,0,:] *= 2.0
+    negative = np.where(stokesI < 0.0)
+    stokesI[negative] += 65536.
+    stokes[:,:,0,:] = stokesI
 
 if (SPBSHIFT > 1):
-	stokes[:,:,3,:] *= 2
+    stokes[:,:,3,:] *= 2.0
 
 if (SPBSHIFT > 2):
-	stokes[:,:,1,:] *= 2
-	stokes[:,:,2,:] *= 2
+    stokes[:,:,1,:] *= 2.0
+    stokes[:,:,2,:] *= 2.0
 
-    
-stokes_corrected = np.copy(stokes)
+#stokes_corrected = np.zeros((stokes.shape), dtype = 'float')
+#stokes_corrected[:, :, 1:, :] = stokes[:, :, 1:, :]
 
-for i in range(stokes_corrected.shape[0]):
-    for j in range(stokes_corrected.shape[1]):
-        for l in range(stokes_corrected.shape[2]):
-            #if (stokes[i,j, 0, l] > (stokes[i,j,0,10] + 7000.)): # to figure out what is "core"
-            if (stokes[i,j, 0, l] < 0):
-                stokes_corrected[i,j, 0, l] = stokes_corrected[i,j, 0, l] + 65536 
-            else:
-                stokes_corrected[i,j, 0, l] = stokes[i,j, 0, l]
-        #stokes_corrected[i,j,0,:] += 65536
+#for i in range(stokes.shape[0]):
+#    for j in range(stokes.shape[1]):
+#        for l in range(stokes.shape[3]):
+#            if stokes[i,j,0,l] < 0:
+#                stokes_corrected[i,j,0,l] = stokes[i,j,0,l] + 65536
+#            else: 
+#                stokes_corrected[i,j,0,l] = stokes[i,j,0,l]
+                
+                
+stokes = np.swapaxes(np.swapaxes(stokes[:, 1:, :, :], 0, 2), 1, 3)
+stokes[:] = np.true_divide(stokes[:], np.mean(stokes[0, :10, :, :]))
 
-stokes_corrected = np.swapaxes(np.swapaxes(stokes_corrected[:, 1:, :, :60], 0, 2), 1, 3)
-for i in range(4):
-    stokes_corrected[i] = np.true_divide(stokes_corrected[i], np.mean(stokes_corrected[i, :10, :, :]))
-
-xxx = fits.PrimaryHDU(stokes_corrected)
+xxx = fits.PrimaryHDU(stokes)
 xxx.writeto(output_cube_name,overwrite=True)
