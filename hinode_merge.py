@@ -16,7 +16,7 @@ print (len(filenames))
 print (filenames[0])
 stokes = fits.open(filenames[0])[0].data
 print (stokes.shape)
-SLITSIZE = stokes.shape[2]
+SLITSIZE = stokes.shape[1] # if the data is in a different format, this is the one to check first.
 print ('Slitlength = ', SLITSIZE)
 stokes = stokes.reshape(1,4,SLITSIZE,112)
 

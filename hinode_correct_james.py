@@ -1,5 +1,5 @@
 # arguments are: data in, data out
-# use like: hinode_correct_james.py
+# use like: hinode_correct_james.py name_in name_out
 
 import numpy as np 
 from astropy.io import fits 
